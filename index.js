@@ -77,17 +77,36 @@ async function run() {
         res.status(500).send({ message: "Failed to process payment" });
       }
     });
+    // get the payment history
+    app.get('/payment', async (req, res) => {
+        const result = await paymentsCollection.find().toArray()
+        res.send(result);
+    })
     //   create-member post api
     app.post("/create-member", async (req, res) => {
-      const query = req.body;
-      const email = {email: query?.email}
-      const isExiting = await membersCollection.findOne({ email})
-      if(isExiting) {
-        return res.status(400).send({message: 'the member has already been'})
-      }
-      const result = await membersCollection.insertOne(query);
-      res.send(result);
-    });
+        const query = req.body;
+        const email = query?.email;  
+        const isExisting = await membersCollection.findOne({ email });
+        
+        if (isExisting) {
+          return res.status(400).send({ message: 'Member already exists' });  // Clearer message
+        }
+        const result = await membersCollection.insertOne(query);
+        res.send(result);
+      });
+
+    //   get the member by id
+    app.get('/create-member/:id', async (req, res) => {
+        const id = req.params.id
+        const result = await membersCollection.findOne({_id: newObjectId(id)})
+        res.send(result)
+    })
+    // delete the member by id member
+    app.delete('/create-member/:id', async (req, res) => {
+        const id = req.params.id
+        const result = await membersCollection.deleteOne({_id: newObjectId(id)})
+        res.send(result)
+    })
     //   create-member get api
     app.get("/create-member", async (req, res) => {
         const result = await membersCollection.find().toArray();
