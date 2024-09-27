@@ -80,6 +80,11 @@ async function run() {
     //   create-member post api
     app.post("/create-member", async (req, res) => {
       const query = req.body;
+      const email = {email: query?.email}
+      const isExiting = await membersCollection.findOne({ email})
+      if(isExiting) {
+        return res.status(400).send({message: 'the member has already been'})
+      }
       const result = await membersCollection.insertOne(query);
       res.send(result);
     });
